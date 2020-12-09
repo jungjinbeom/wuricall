@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wurigo.socialService.dao.AdminMapper">
+	<select id="read" resultType="String" parameterType="Map">
+		SELECT adminNum FROM woori_social_admin WHERE adminNum=#{adminNum} 
+	</select>
+	<select id="readOne" resultType="String" parameterType="Map">
+		SELECT adminId FROM woori_social_admin WHERE adminId=#{adminId} 
+	</select>
+	<select id="adminLogin" resultType="HashMap" parameterType="Map">
+		SELECT 
+			adminName,password,adminNum
+		FROM 
+			woori_social_admin WHERE adminId=#{adminId} 
+	</select>
+	<select id="adminInfo" resultType="HashMap" parameterType="Map">
+		SELECT* FROM 
+			woori_social_admin WHERE adminNum=#{adminNum} 
+	</select>
+	<select id="groupCodeRecord" resultType="HashMap" parameterType="Map">
+		select code_l,code_m from woori_district where sido_2=#{sido_2} and sigungu=#{sigungu} LIMIT 1;
+	</select>
+	<select id="adminFindEmail" resultType="String" parameterType="Map">
+		select adminId from woori_social_admin WHERE adminId=#{adminId} 
+	</select>
+	<update id="adminPasswordUpdate">
+		UPDATE woori_social_admin 
+			SET
+				password=#{param1}
+			WHERE 
+				adminId=#{param2}
+	</update>
+	<update id="lastLoginDateInsert" parameterType="Map">
+		UPDATE woori_social_admin 
+			SET
+				lastLoginDate=now() 
+			WHERE 
+				adminId=#{adminId}
+	</update>
+	<update id="adminInfoEdit" parameterType="Map">
+		UPDATE woori_social_admin 
+			SET
+				adminName=#{adminName},phoneNo=#{phoneNo},groupName=#{groupName},groupCode=#{groupCode}
+			WHERE 
+				adminNum=#{adminNum}
+	</update>
+	<insert id="adminRegister" parameterType="String">
+		INSERT INTO
+			woori_social_admin
+				(adminId,password,adminName,groupName,groupCode,phoneNo,adminNum,create_date,isDelete) 
+			VALUES
+				(#{adminId},#{password},#{adminName},#{groupName},#{groupCode},#{phoneNo},#{adminNum},now(),0)
+	</insert>
+</mapper>

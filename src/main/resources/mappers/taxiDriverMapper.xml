@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wurigo.socialService.dao.TaxiDriverMapper">
+	<select id="readOne" resultType="String">
+	 		SELECT 
+	 			groupCode 
+	 		FROM 
+	 			woori_social_admin 
+					WHERE adminNum=#{param1}
+	</select>
+	<select id="TaxiDriverList" parameterType="Map" resultType="HashMap">
+		SELECT drivername,phoneno,taxi_no FROM 
+			woori_driver 
+		WHERE 
+			codeL=#{codeL} AND codeM=#{codeM};
+	</select>
+</mapper>

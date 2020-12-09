@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wurigo.socialService.dao.UserMapper">
+	<select id="read" resultType="String" parameterType="Map">
+		SELECT 
+			adminId 
+		FROM
+			woori_social_admin WHERE adminNum=#{adminNum}					
+	</select>
+	<select id="userInfoList" resultType="HashMap">
+		SELECT customerNo,username,phone,point,DATE_FORMAT(create_date,'%Y-%m-%d')create_date  FROM 
+			woori_user 
+		WHERE 
+			zip_code=#{zip_code}
+	</select>
+	<select id="userInfo" resultType="HashMap">
+		SELECT * FROM 
+			woori_user 
+		WHERE 
+			customerNo=#{customerNo}
+	</select>
+	<insert id="userRegister" parameterType="Map">
+		INSERT 
+			INTO woori_user
+				(customerNo,customerType,phone,email,password2,username,create_date,point,address,address_detail,zip_code,guardian,licenseNo) 
+			VALUES
+				(#{customerNo},#{customerType},#{phone},#{email},#{password},#{name},now(),#{point},#{addr},#{uniqueness},#{zip_code},#{guardian},#{licenseNo})
+	</insert>
+	<update id="userInfoEdit" parameterType="Map">
+		UPDATE woori_user SET 
+			email=#{phone},phone=#{phone},username=#{username},address=#{address},address_detail=#{uniqueness},point=#{point}
+			WHERE customerNo=#{customerNo}
+	</update>
+</mapper>

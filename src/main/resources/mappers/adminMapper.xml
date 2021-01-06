@@ -12,16 +12,19 @@
 	</select>
 	<select id="adminLogin" resultType="HashMap" parameterType="Map">
 		SELECT 
-			adminName,password,adminNum
+			adminName,password,adminNum,approval
 		FROM 
 			woori_social_admin WHERE adminId=#{adminId} 
 	</select>
 	<select id="adminInfo" resultType="HashMap" parameterType="Map">
-		SELECT* FROM 
+		SELECT * FROM 
 			woori_social_admin WHERE adminNum=#{adminNum} 
 	</select>
+	<select id="districtInfo" resultType="HashMap" parameterType="Map">
+		SELECT sigungu FROM woori_district WHERE sido=#{sido} GROUP BY sigungu ;
+	</select>
 	<select id="groupCodeRecord" resultType="HashMap" parameterType="Map">
-		select code_l,code_m from woori_district where sido_2=#{sido_2} and sigungu=#{sigungu} LIMIT 1;
+		select code_l,code_m from woori_district where sido=#{sido_2} and sigungu=#{sigungu} LIMIT 1;
 	</select>
 	<select id="adminFindEmail" resultType="String" parameterType="Map">
 		select adminId from woori_social_admin WHERE adminId=#{adminId} 
@@ -47,11 +50,19 @@
 			WHERE 
 				adminNum=#{adminNum}
 	</update>
+	<update id="adminUpdatePwd" parameterType="Map">
+		UPDATE woori_social_admin 
+			SET
+				password=#{password}
+			WHERE 
+				adminId=#{adminId}
+	</update>
+	
 	<insert id="adminRegister" parameterType="String">
 		INSERT INTO
 			woori_social_admin
-				(adminId,password,adminName,groupName,groupCode,phoneNo,adminNum,create_date,isDelete) 
+				(adminId,password,adminName,groupName,groupCode,phoneNo,adminNum,create_date,isDelete,approval) 
 			VALUES
-				(#{adminId},#{password},#{adminName},#{groupName},#{groupCode},#{phoneNo},#{adminNum},now(),0)
+				(#{adminId},#{password},#{adminName},#{groupName},#{groupCode},#{phoneNo},#{adminNum},now(),0,0)
 	</insert>
 </mapper>

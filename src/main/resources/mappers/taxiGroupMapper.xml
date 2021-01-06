@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wurigo.socialService.dao.TaxiGroupMapper">
+	<select resultType="String" id="readOne">
+		SELECT 
+			driverlist
+		FROM
+			woori_taxigroup
+		WHERE
+			groupNo=#{param1}
+ 	</select>
+	<select resultType="HashMap" id="taxiGroupList">
+		SELECT 
+			groupNo,groupName,customerNo,DATE_FORMAT(create_date,'%Y-%m-%d')create_date,driverlist 
+		FROM
+		 	woori_taxigroup 
+		WHERE 
+			customerNo=#{param1} 
+	</select>
+	
+	<select resultType="HashMap" id="taxiGroupDetail">
+		SELECT 
+			driverlist,groupName,customerNo,create_date
+		FROM
+			woori_taxigroup
+		WHERE
+			groupNo=#{param1} 
+	</select>
+	
+	<select resultType="HashMap" id="taxiDriverInfo">
+		SELECT
+			drivername,driverno,phoneno, DATE_FORMAT(create_date,'%Y-%m-%d')create_date,taxi_no,taxi_type,taxi_size
+		FROM
+			woori_driver
+		WHERE
+			driverNo=#{param1}
+	</select>
+	
+	<insert id="taxiGroupRegister" parameterType="Map">
+	INSERT
+	INTO woori_taxigroup
+		(groupName,customerNo,customerType,driverlist,create_date)
+	VALUES
+	(#{groupName},#{adminNum},10,#{driverlist},now()) 
+	</insert>
+	
+	<update id="taxiGroupEdit">	
+		UPDATE woori_taxigroup 
+		SET 
+			driverlist=#{param1},groupName=#{param2}
+		WHERE
+			groupNo=#{param3} 
+	</update>
+	<delete id="taxiGroupDelete">
+		DELETE 
+		FROM 
+			woori_taxigroup
+		 WHERE 
+		 groupNo=#{param1} 
+	</delete>
+
+</mapper>

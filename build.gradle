@@ -1,28 +1,94 @@
-plugins {
-	id 'org.springframework.boot' version '2.4.0'
-	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-	id 'java'
+buildscript {
+	ext {
+		springBootVersion = '2.4.0.RELEASE'
+		mooworkVersion = '1.3.1'
+	}
+
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath "com.github.node-gradle:gradle-node-plugin:2.2.4"
+	}
 }
 
-group = 'com.wuricall'
+plugins {
+	id 'org.springframework.boot' version '2.4.0'
+	id 'java'
+}
+apply plugin: 'war'
+apply plugin: 'java'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: "com.github.node-gradle.node"
+apply plugin: 'application'
+
+mainClassName = 'com.wurigo.socialService.WurigoServiceApplication'
+group = 'com.wurigo'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 repositories {
 	mavenCentral()
 }
-
+bootWar {
+	archiveBaseName="ROOT"
+	archiveFileName="ROOT.war"
+	archiveVersion="0.0.0"
+}
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.session:spring-session-core'
-	compile("org.springframework.boot:spring-boot-starter-mail")
+	compile group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
 	
 }
 
-test {
-	useJUnitPlatform()
+
+
+def webappDir = "$projectDir/frontend/wurigo-social-service"
+
+// node 버전 및 npm, node 설치파일 저장 디렉토리 명시
+node {
+    version = '12.18.4'
+    download= true
+    workDir = file("${project.buildDir}/nodejs")
+    npmWorkDir=file("${project.buildDir}/npm")
 }
+
+// npm install 과정
+task appNpmInstall(type: NpmTask) {
+    workingDir = file("${project.projectDir}/frontend/wurigo-social-service")
+    args = ["install"]
+}
+
+// yarn build
+task yarnBuild(type: YarnTask) {
+    workingDir = file("${project.projectDir}/frontend/wurigo-social-service")
+    args = ['build']
+}
+
+// 빌드된 결과 resources로 이동
+task copyWebApp(type: Copy) {
+    from "frontend/wurigo-social-service/build"
+    into 'build/resources/main/static/.'
+}
+
+yarnBuild.dependsOn appNpmInstall
+copyWebApp.dependsOn yarnBuild
+compileJava.dependsOn copyWebApp

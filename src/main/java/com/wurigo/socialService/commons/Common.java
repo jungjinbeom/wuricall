@@ -1,31 +1,45 @@
 package com.wurigo.socialService.commons;
 
-
+import java.io.BufferedReader;
 import java.io.IOException;
-
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
-import com.wurigo.socialService.dao.UserMapper;
-import com.wurigo.socialService.securty.WURI_Security;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wurigo.socialService.dao.ConstantDAO;
+import com.wurigo.socialService.dao.CustomerDAO;
+import com.wurigo.socialService.domain.Customer;
+import com.wurigo.socialService.security.WURI_Security;
+import com.wurigo.socialService.service.CustomerService;
 
 @Component
 //@Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Common  {  //implements InitializingBean, DisposableBean
 	
 	@Autowired
-	private static UserMapper userMapper;
+	private static CustomerDAO custDao;
+	@Autowired
+	private static CustomerService custService;
+	@Autowired
+	private static ConstantDAO constDao;
+	
 	@Autowired
 	private static WURI_Security m_security;
 	
@@ -54,43 +68,43 @@ System.out.println("destroy");
 
 		WURI_Security.generate_keypair(RSA_PUBLIC_KEY,RSA_PRIVATE_KEY);  
 	}*/
-//	public static Map<String, Object> check_accesstoken(String accesstoken) throws Exception {
-//		
-///*		try {
-//			WURI_Security.generate_keypair();
-////			generate_keypair();
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		} */
-//		Map<String, Object> r_map = m_security.check_accesstoken(accesstoken);
-//		
-//		int code = (int)r_map.get("code");
-//		if(code <= 0) {
-//			if(code==0) r_map.put("message", "로그인 사용시간을 초과했습니다.다시 로그인하세요.");
-//			else r_map.put("message", "ERROR!");
-//				
-//			return r_map;   // code=-1: error  0: timeout
-//		}
-//		String usertoken = (String)r_map.get("usertoken");
-//System.out.println("usertoken: " +usertoken);	
-//
-//	userMapper = (UserMapper)getBean("userMapper");
-////		ApplicationContext context = new AnnotationConfigApplicationContext("com.wuricall.wurigo");
-////		custDao = context.getBean(CustomerDAO.class);
-//
-//		UserVO user = userMapper.findByToken(usertoken);		
-//		if(user==null) {
-//			r_map.put("code", 1);  // not exist user
-//			r_map.put("message", "존재하지 않는 사용자입니다.");
-//		}
-//		else {
-//			r_map.put("code", 2); 
-//			r_map.put("customerNo", user.getCustomerNo()); 
-//			r_map.put("customerType", user.getCustomerType()); 
-//		}
-//		return r_map; 
-//	}
+	public static Map<String, Object> check_accesstoken(String accesstoken) throws Exception {
+		
+/*		try {
+			WURI_Security.generate_keypair();
+//			generate_keypair();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} */
+		Map<String, Object> r_map = m_security.check_accesstoken(accesstoken);
+		int code = (int)r_map.get("code");
+		if(code <= 0) {
+			System.out.println(code);
+			if(code==0) r_map.put("message", "로그인 사용시간을 초과했습니다.다시 로그인하세요.");
+			else r_map.put("message", "ERROR!");
+				
+			return r_map;   // code=-1: error  0: timeout
+		}
+		String usertoken = (String)r_map.get("usertoken");
+System.out.println("usertoken: " +usertoken);	
+
+		custDao = (CustomerDAO)getBean("customerDAO");
+//		ApplicationContext context = new AnnotationConfigApplicationContext("com.wuricall.wurigo");
+//		custDao = context.getBean(CustomerDAO.class);
+
+		Customer user = custDao.findByToken(usertoken);	
+		if(user==null) {
+			r_map.put("code", 1);  // not exist user
+			r_map.put("message", "존재하지 않는 사용자입니다.");
+		}
+		else {
+			r_map.put("code", 2); 
+			r_map.put("customerNo", user.getCustomerNo()); 
+			r_map.put("customerType", user.getCustomerType()); 
+		}
+		return r_map; 
+	}
 //check_accesstoken와 pair로 사용해야함 because WURI_Security.generate_RSA_keypair()	
 	public static String update_accesstoken( String accesstoken) {
 		return m_security.update_accesstoken(accesstoken);

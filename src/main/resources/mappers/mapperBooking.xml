@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wurigo.socialService.dao.BookingDAO">
+	 
+	<insert id="registBooking" useGeneratedKeys="true"  keyProperty="reserveNo"
+			parameterType="java.util.HashMap"  >
+		INSERT INTO woori_booking (
+			reserveNo, customerType, customerNo,create_date, 
+			startDay, reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code, callPayMethod,    	<!-- serviceChargeFee, -->
+			startLocX,startLocY,finishLocX, finishLocY,
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc
+			
+		) VALUES
+		( 	#{reserveNo}, #{customerType}, #{customerNo}, now(), 
+			#{startDay}, #{reserveTime},
+			#{startLocPlace}, #{finishLocPlace}, #{startAddress}, #{finishAddress},
+			0 , 0, #{serviceType},   #{serviceCharge} , #{callfee}, #{groupNo},
+			#{passengerType},  #{passenger},  #{drivers},   #{etcService},   
+			#{s_sido_code}, #{e_sido_code }, #{callPayMethod},  	<!-- #{serviceChargeFee, jdbcType=INTEGER}, --> 
+			#{startLocX} , #{startLocY}, #{finishLocX}, #{finishLocY},   <!-- for java -->
+			#{startLocXenc} , #{startLocYenc}, #{finishLocXenc}, #{finishLocYenc} <!-- for PHP -->
+		)	 					   
+	</insert>
+	 
+	<select id="getMaxBookingNo"  resultType="int">
+		SELECT  MAX(reserveNo ) AS maxNo FROM woori_booking
+	</select>
+	<select id="bookingInfo" resultType="Map">
+		select startLocXenc,startLocYenc from woori_booking WHERE customerNo=#{param1} AND reserveNo=#{param2} 
+	</select>
+	<select id="getBookingInfo" resultType="Map">
+		SELECT 
+			reserveNo,customerNo, customerType,create_date, driverNo,
+			startDay, reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code, callPayMethod,    	<!-- serviceChargeFee, -->
+			startLocX,startLocY,finishLocX, finishLocY,
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,
+			serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+			,(SELECT seq FROM woori_social_booking WHERE reserveNo=A.reserveNo) AS isSocial 
+		FROM woori_booking  A
+   		WHERE reserveNo = #{param1}
+   		ORDER BY startDay   DESC
+	</select>
+	<update id="updateBooking" parameterType="java.util.HashMap" >
+		UPDATE woori_booking 
+		<trim prefix="SET" suffixOverrides=",">
+			update_date=now(),
+			<if test="reserveTime != null">	reserveTime = #{reserveTime},</if>
+			<if test="startLocPlace != null"> startLocPlace = #{startLocPlace},</if>	      	
+	      	<if test="finishLocPlace != null"> finishLocPlace = #{finishLocPlace},</if>
+	      	<if test="startAddress != null"> startAddress = #{startAddress},</if>
+		 	<if test="finishAddress != null"> finishAddress = #{finishAddress},</if>
+		 	<if test="serviceType != null"> serviceType = #{serviceType},</if>
+		 	<if test="serviceCharge != null"> serviceCharge = #{serviceCharge},</if>		 	
+		 	<if test="callfee != null"> 	callfee = #{callfee},</if>
+		 	<if test="groupNo != null"> 	groupNo = #{groupNo},</if>
+		 	<if test="passengerType != null"> passengerType = #{passengerType},</if>
+		 	<if test="passenger != null"> 	passenger = #{passenger},</if>
+		 	<if test="drivers != null"> 	drivers = #{drivers},</if>
+		 	<if test="callPayMethod != null"> callPayMethod = #{callPayMethod},</if>
+		 	<if test="etcService != null"> etcService = #{etcService},</if>
+		 	<if test="s_sido_code != null"> s_sido_code = #{s_sido_code},</if>
+		 	<if test="e_sido_code != null"> e_sido_code = #{e_sido_code},</if>
+		 	<if test="startLocX != null"> startLocX = #{startLocX},</if>		 	
+		 	<if test="startLocY != null"> startLocY = #{startLocY},</if>
+		 	<if test="finishLocX != null"> finishLocX = #{finishLocX},</if>
+		 	<if test="finishLocY != null"> finishLocY = #{finishLocY},</if>		 	
+		 	<if test="startLocXenc != null"> startLocXenc = #{startLocXenc},</if>		 	
+		 	<if test="startLocYenc != null"> startLocYenc = #{startLocYenc},</if>
+		 	<if test="finishLocXenc != null"> finishLocXenc = #{finishLocXenc},</if>
+		 	<if test="finishLocYenc != null"> finishLocYenc = #{finishLocYenc},</if>
+		</trim>
+		WHERE reserveNo = #{reserveNo}  
+	</update>
+	
+	<update id="cancelAcceptedBooking" parameterType="java.util.HashMap" >
+		UPDATE woori_booking 
+		<trim prefix="SET" suffixOverrides=",">
+			update_date=now(),
+			<if test="state != null">	state = #{state},</if>
+			<if test="caseType != null"> caseType = #{caseType},</if>	 	
+		</trim>
+		WHERE reserveNo = #{reserveNo}  AND state=1 
+	</update>
+	
+	<delete id="deleteBooking">
+		DELETE FROM woori_booking
+		 WHERE reserveNo = #{reserveNo}  
+	</delete>
+	
+	<select id="findBookingByToday"  resultType="Map">
+		SELECT 
+			reserveNo, customerType, customerNo,create_date, driverNo,
+			startDay, reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code, callPayMethod,    	<!-- serviceChargeFee, -->
+			startLocX,startLocY,finishLocX, finishLocY,
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,
+			serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+			,(SELECT seq FROM woori_social_booking WHERE reserveNo=A.reserveNo) AS isSocial 
+			
+		FROM woori_booking  A
+   		WHERE customerNo = #{customerNo}
+   		AND startDay = #{startDay}
+   		ORDER BY startDay   DESC
+	</select>
+	
+	<select id="findBookingByNo"  resultType="Map">
+		SELECT 
+			reserveNo, customerType, customerNo,create_date, driverNo,
+			startDay, reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code, callPayMethod,    	<!-- serviceChargeFee, -->
+			startLocX,startLocY,finishLocX, finishLocY,
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,
+			serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+			
+			,(SELECT seq FROM woori_social_booking WHERE reserveNo=A.reserveNo) AS isSocial 
+		FROM woori_booking  A
+   		WHERE  reserveNo = #{reserveNo}
+	</select>
+	
+	<select id="findBookingByAfterDay"   resultType="Map">
+		SELECT 
+			reserveNo, customerType, customerNo,create_date, driverNo,
+			startDay, reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code, callPayMethod,    	<!-- serviceChargeFee, -->
+			startLocX,startLocY,finishLocX, finishLocY,
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc ,
+			serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+			,(SELECT seq FROM woori_social_booking WHERE reserveNo=A.reserveNo) AS isSocial 
+			
+		FROM woori_booking A
+   		WHERE customerNo = #{customerNo}<if test="state !=77"> AND state = #{state}</if> AND str_to_date(startDay,'%Y-%m-%d') >= str_to_date( #{startDay} ,'%Y-%m-%d')
+   		ORDER BY  state ASC,  startDay   DESC
+	</select>
+	
+<!-- ,(SELECT seq FROM woori_social_booking WHERE reserveNo=A.reserveNo) AS isSocial -->	
+
+	<select id="findBookingByInterval"  resultType="Map">
+		SELECT 
+			reserveNo, customerType, customerNo,create_date, driverNo,
+			startDay, reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code, callPayMethod,    	<!-- serviceChargeFee, -->
+			startLocX,startLocY,finishLocX, finishLocY,
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc ,
+			serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+			,(SELECT seq FROM woori_social_booking WHERE reserveNo=A.reserveNo) AS isSocial 
+		FROM woori_booking A
+   		WHERE customerNo = #{customerNo} 
+   		<if test="state != 77"> AND state = #{state}</if>
+   		AND 
+   			startDay BETWEEN str_to_date(#{startDay}, '%Y-%m-%d') and str_to_date(#{endDay}, '%Y-%m-%d')
+   		ORDER BY  state ASC,  startDay   DESC
+	</select>
+	
+</mapper>	

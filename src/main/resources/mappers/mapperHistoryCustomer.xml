@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wurigo.socialService.dao.HistoryCustomerDAO">
+
+	
+	<select id="getCustomerHistory" parameterType="java.util.HashMap" 
+									resultType="com.wurigo.socialService.domain.HistoryCustomer">
+		SELECT * FROM woori_history_customer 
+		WHERE customerNo = #{ customerNo }  
+		<if test="caseType != null">
+		  AND  caseType = #{ caseType }
+		</if>
+		<if test="driverNo != null">
+		  AND  driverNo = #{ driverNo }
+		</if>
+		<if test="callNo != null">
+		  AND  callNo = #{ callNo }
+		</if> 
+		<if test="reserveDate != null">
+		  AND  reserveDate like CONCAT( #{reserveDate},'%')
+		</if> 
+	</select>
+	
+	
+	<insert id="insertCustomerHistory" parameterType="java.util.HashMap" >
+		INSERT INTO woori_history_customer (
+			 customerNo, action_date, caseType, callNo, driverNo, 
+			 reserveNo, reserveType, reserveDate,   
+			 penalty_don, totalpayment, toll, fare, Cause, encLat, encLon      
+
+		) VALUES
+		( 	#{customerNo}, now(), #{caseType, jdbcType=INTEGER}, #{callNo, jdbcType=INTEGER}, #{driverNo, jdbcType=VARCHAR}, 
+			#{reserveNo, jdbcType=INTEGER}, #{reserveType, jdbcType=INTEGER}, #{reserveDate, jdbcType=VARCHAR}, 
+			#{penalty_don, jdbcType=INTEGER}, #{totalpayment, jdbcType=INTEGER}, 
+			#{toll, jdbcType=INTEGER}, #{fare, jdbcType=INTEGER}, 
+			#{Cause, jdbcType=VARCHAR}, #{encLat, jdbcType=VARCHAR}, #{encLon, jdbcType=VARCHAR} 
+		)	 			
+	</insert>
+	
+	<delete id="deleteCustomerHistory">
+		DELETE FROM woori_history_customer
+		WHERE customerNo = #{_customerNo}
+	</delete>
+	
+</mapper>

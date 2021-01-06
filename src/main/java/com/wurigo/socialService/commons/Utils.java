@@ -1,6 +1,7 @@
 package com.wurigo.socialService.commons;
 
 import java.net.InetAddress;
+
 import java.net.NetworkInterface;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -10,74 +11,99 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+
+import java.io.BufferedReader;
+
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+
+@Component
 public class Utils {
-		final static String[] area_names = { "서울", "부산", "대구", "인천", "광주", "대전","울산","세종", "경기","강원",
-					   "충북", "충남", "전북", "전남", "경북", "경남", "제주" };
-		final static String[] area_codes = { "11", "21", "22", "23", "24", "25","26","29", "31","32",
-						"33", "34", "35", "36", "37", "38", "39" };
-		
-		public static String toCurrencyFormat(String value) {
-			int num = Integer.parseInt(value);
-	        NumberFormat formatter = new DecimalFormat("#,###");
-	        String formattedNumber = formatter.format(num);
-	        return formattedNumber;
-	    }
-		public static double calc_distance(double lat1,double lon1,double lat2,double lon2,String unit) {
-			 
-				
-			double theta = lon1 - lon2;
-			double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) +  
-					Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
-			dist = Math.acos(dist);
-			dist = Math.toDegrees(dist);
-			double miles = dist * 60 * 1.1515;
+	final static String[] area_names = { "서울", "부산", "대구", "인천", "광주", "대전","울산","세종", "경기","강원",
+								   "충북", "충남", "전북", "전남", "경북", "경남", "제주" };
+	final static String[] area_codes = { "11", "21", "22", "23", "24", "25","26","29", "31","32",
+			   						"33", "34", "35", "36", "37", "38", "39" };
+	
+	
+	public static String toCurrencyFormat(String value) {
+		int num = Integer.parseInt(value);
+        NumberFormat formatter = new DecimalFormat("#,###");
+        String formattedNumber = formatter.format(num);
+        return formattedNumber;
+    }
+	public static double calc_distance(double lat1,double lon1,double lat2,double lon2,String unit) {
+		 
+			
+		double theta = lon1 - lon2;
+		double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) +  
+				Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
+		dist = Math.acos(dist);
+		dist = Math.toDegrees(dist);
+		double miles = dist * 60 * 1.1515;
 
-			if (unit.equals("K")) {
-				return (miles * 1.609344);
-			} else if (unit.equals("N")) {
-				return (miles * 0.8684);
-			} if (unit.equals("M")) { //meter
-				return (miles * 1609.344);
-			}
-			else {
-				return miles;
-			}
-			 
+		if (unit.equals("K")) {
+			return (miles * 1.609344);
+		} else if (unit.equals("N")) {
+			return (miles * 0.8684);
+		} if (unit.equals("M")) { //meter
+			return (miles * 1609.344);
 		}
-		public static boolean isMidNight(String rTime) throws ParseException {
-			
-			long time = System.currentTimeMillis(); 
-
-			SimpleDateFormat dayTime = new SimpleDateFormat("hh:mm:ss");
-			Date curTime = new Date(time) ;
-			
-			Date midnight2 = dayTime.parse("04:00:00");
-			Date midnight1 = dayTime.parse("00:00:00");
-		    
-			if(curTime.compareTo(midnight1)>=0  && curTime.compareTo(midnight2)<=0 ) return true;
-			
-			return false;
-
+		else {
+			return miles;
 		}
+		 
+	}
+	public static boolean isMidNight(String rTime) throws ParseException {
 		
+		long time = System.currentTimeMillis(); 
+
+		SimpleDateFormat dayTime = new SimpleDateFormat("hh:mm:ss");
+		Date curTime = new Date(time) ;
+		
+		Date midnight2 = dayTime.parse("04:00:00");
+		Date midnight1 = dayTime.parse("00:00:00");
+	    
+		if(curTime.compareTo(midnight1)>=0  && curTime.compareTo(midnight2)<=0 ) return true;
+		
+		return false;
+
+	}
 	public static String get_area_code(String address) {
 		String sido="", sido_code="";
-		if(address.contains("충청북도"))		sido = "충북";
+		if	   (address.contains("충청북도"))	sido = "충북";
 		else if(address.contains("충청남도")) sido = "충남";
 		else if(address.contains("전라북도")) sido = "전북";
 		else if(address.contains("전라남도")) sido = "전남";
 		else if(address.contains("경상북도")) sido = "경북";
 		else if(address.contains("경상남도")) sido = "경남"; 
 		else sido = address.substring(0,2);
+//System.out.println("get_area_code:" + address	+ "/" + sido);	
 		
 		for(int i=0; i<area_names.length; i++ ) {
 			if(sido.equals(area_names[i])) {
 				sido_code =  area_codes[i]; break;
 			}
 		}
+System.out.println("sido_code:" + sido_code);			
 		return sido_code;
 	}
-	
 	// 지정된 범위의 정수 1개를 램덤하게 반환하는 메서드
 	  // n1 은 "하한값", n2 는 상한값
 	public static int randomRange(int n1, int n2) {
@@ -144,6 +170,8 @@ public class Utils {
         } catch (Exception ignored) { } // for now eat exceptions
         return "";
     }
+
+
     //임시비밀번호 생성기 
     public static String getRamdomPassword() {
     	char[] charSet = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 

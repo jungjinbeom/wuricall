@@ -16,4 +16,21 @@
 		WHERE 
 			codeL=#{codeL} AND codeM=#{codeM};
 	</select>
+	<select id="taxiDriverAllList" parameterType="Map" resultType="HashMap"> 
+		SELECT 
+			drivername,driverno,phoneno, DATE_FORMAT(create_date,'%Y-%m-%d')create_date,taxi_no,taxi_type,taxi_size,islady
+		FROM 
+			woori_driver
+	</select>
+	<select id="taxiDriverInfoList" parameterType="Map" resultType="HashMap"> 
+		SELECT 
+			drivername,phoneno, DATE_FORMAT(create_date,'%Y-%m-%d')create_date,taxi_no,taxi_type,taxi_size,driverno 
+		FROM 
+			woori_driver
+	    WHERE 
+	    	serviceL=#{sido} AND serviceM=#{sigungu};
+	</select>
+	<select id="taxiDriverInfo" resultType="String">
+		select taxi_no from woori_driver where driverNo=#{param1} 	
+	</select>
 </mapper>

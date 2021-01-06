@@ -1,5 +1,5 @@
 package com.wurigo.socialService.service;
 
 public interface EmailService {
-	public void sendEmail(String toAddress, String subject, String body);
+	public boolean sendMail(String to , String subject, String connect) throws Exception;
 }

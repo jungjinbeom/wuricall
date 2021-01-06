@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wurigo.socialService.dao.CustomerDAO">
+
+	<!-- 
+		mybatis-config.xml의 typeAlias에 등록해두지 않았다면 
+		
+		<select id="selectMember" resultType="com.example.dto.MemberVO" >
+			SELECT ID, PW ,NAME FROM TEST
+		</select>
+		
+		이렇게 해야 한다.
+	-->
+	<resultMap type="java.util.HashMap" id="withdrawalMap"> 
+		<result column="userNo" property="userno"/> 
+		<result column="userName" property="username"/> 
+		<result column="userPhone" property="userphone"/> 
+	</resultMap>
+	
+	 
+
+
+	<!-- ;사용시 오류  -->
+	<select id="getCustomer" resultType="com.wurigo.socialService.domain.Customer">
+		SELECT usernum, customerNo, phone,email, username, customerType, create_date from woori_user
+	</select>
+	
+	<select id="read" resultType="com.wurigo.socialService.domain.Customer">
+		SELECT * from woori_user where customerNo = #{_customerNo}
+	</select>
+	
+	<select id="readOne" resultType="com.wurigo.socialService.domain.Customer">
+		SELECT * from woori_user where email = #{_email}
+	</select>
+	<select id="findByToken" resultType="com.wurigo.socialService.domain.Customer">
+		SELECT * from woori_user where user_token = #{_usertoken}
+	</select>
+	<select id="social_readOne" resultType="HashMap">
+		SELECT customerNo FROM woori_booking WHERE reserveNo=#{reserveNo}
+	</select>
+	<select id="getUseCount" resultType="String">
+		SELECT count(A.reserveNo) AS usedSocialCount
+			FROM woori_booking A, woori_social_booking B  WHERE B.reserveType=0 AND B.reserveNo =A.reserveNo AND 
+			A.customerNo= #{param1}  AND A.customerNo=B.customerNo AND 
+			( A.state=1 OR A.state=3 OR (A.state=2 AND A.caseType=52) OR A.state=7 OR A.state=10 )
+	</select>
+	<select id="social_getGroupList" parameterType="java.util.HashMap" resultType="HashMap">
+		SELECT groupName,description,groupCode,DATE_FORMAT(create_date,'%Y-%m-%d')create_date FROM woori_social_group where adminNum = #{adminNum}
+	</select>
+	<select id="social_getGroupName" parameterType="java.util.HashMap" resultType="HashMap">
+		SELECT groupName FROM woori_social_group where adminNum = #{adminNum} and groupName=#{groupName}
+	</select>
+	<select id="userInfoPartList" parameterType="java.util.HashMap" resultType="HashMap">
+		SELECT g.groupName, u.customerNo
+			FROM woori_social_group g JOIN woori_social_user u
+			ON g.groupCode =#{groupCode} WHERE u.groupCode=#{groupCode} AND g.adminNum = #{adminNum}
+	</select>
+<!--  
+	<insert id="joinUser" useGeneratedKeys="true"  keyProperty="usernum"
+			parameterType="com.wuricall.wurigo.domain.Customer"  >
+		INSERT INTO woori_user (customerNo, customerType, phone, email, password2, username, 
+									   create_date, user_token, real_name) VALUES
+			( #{customerNo},#{customerType},#{phone},#{email},#{password2},#{username},now(),
+			  #{user_token},#{real_name} )	 					   
+	</insert>  -->
+  	<insert id="social_groupCreate" parameterType="java.util.HashMap">
+ 		INSERT INTO woori_social_group(groupName,adminNum,description,create_date) 
+ 		VALUES(#{groupName},#{adminNum},#{description},now())
+  	</insert>
+  	<insert id="social_userOtherRegister" parameterType="java.util.HashMap">
+ 		INSERT INTO woori_social_user(adminNum,customerNo,groupCode,social_type,create_date) 
+ 		VALUES(#{adminNum},#{customerNo},#{groupCode},#{social_type},now())
+  	</insert>
+	<insert id="registerUser" useGeneratedKeys="true"  keyProperty="usernum"
+			parameterType="java.util.HashMap"  >
+		INSERT INTO woori_user (customerNo, customerType, phone, email, password2, username, 
+									   create_date, real_name) VALUES
+			( #{customerNo},#{customerType},#{phone},#{email},#{password2},#{username},now(),#{real_name} )	 					   
+	</insert>
+	
+	<update id="updateUser">
+		UPDATE woori_user SET
+			phone = #{phone}, password2 = #{password2}, username = #{username}, modify_date=now()
+		WHERE customerNo = #{ customerNo }
+	</update>
+
+	<update id="updateToken" >
+		UPDATE woori_user
+		   SET user_token = #{ _user_token } , dev_token = #{ _dev_token }
+		WHERE customerNo = #{ _customerNo }
+	</update>
+	
+	<insert id="insertLoginHistory"  parameterType="java.util.HashMap"  >
+		INSERT INTO woori_history_login (userType, loginID, devType, login_date, success, IP, code)
+    	VALUES ( #{userType}, #{loginID}, #{devType},now(), #{success}, #{IP}, #{code}   ) 
+	</insert>
+	
+	<select id="checkWithdrawal"  resultMap="withdrawalMap">  
+		SELECT userNo, userName FROM  woori_withdrawal   WHERE userName = #{_email} AND userType=0 
+				AND leave_date > DATE_SUB(now(), INTERVAL 7 DAY)
+				ORDER BY leave_date DESC
+	</select>
+	
+<!-- social user  -->
+	<select id="social_userInfoList" resultType="HashMap">
+		SELECT 
+			customerNo,customerType,username,phone,point,user_token,DATE_FORMAT(create_date,'%Y-%m-%d')create_date
+		FROM 
+			woori_user 
+		WHERE 
+			zip_code=#{zip_code} and goodbye=0
+	</select>
+	<select id="social_userInfo" resultType="HashMap">
+		SELECT customerNo,customerType,usernum,phone,email,password2,username,
+				DATE_FORMAT(create_date,'%Y-%m-%d')create_date,point,user_token,
+				guardian,licenseNo,address,address_detail,zip_code 
+		FROM 
+			woori_user 
+		WHERE 
+			customerNo=#{param1} and goodbye=0
+	</select>
+	<insert id="social_userRegister" parameterType="Map"
+	useGeneratedKeys="true"  keyProperty="usernum">
+		INSERT 
+			INTO woori_user
+				(customerNo,customerType,phone,email,password2,username,real_name,create_date,point,address,address_detail,zip_code,guardian,licenseNo) 
+			VALUES
+				(#{customerNo},#{customerType},#{phone},#{email},#{password2},#{username},#{username},now(),#{point},#{address},#{uniqueness},#{zip_code},#{guardian},#{licenseNo})
+	</insert>
+	<update id="social_userInfoEdit" parameterType="Map">
+		UPDATE woori_user SET 
+			email=#{phone},phone=#{phone},username=#{username},address=#{address},address_detail=#{uniqueness},point=#{point}
+			WHERE customerNo=#{customerNo}
+	</update>	
+	
+	<select id="getAdmin" resultType="String" parameterType="Map">
+		SELECT 
+			adminId 
+		FROM
+			woori_social_admin WHERE adminNum=#{adminNum}					
+	</select>
+	<select id="getGroupInfo" parameterType="Map" resultType="HashMap">
+		SELECT * FROM woori_social_user WHERE customerNo=#{customerNo}
+	</select>
+	
+	<select id="getGroupName"  resultType="HashMap">
+		SELECT groupName FROM woori_social_group WHERE groupCode=#{groupCode}
+	</select>
+	<select id="social_getCustomerNo"  resultType="HashMap">
+		SELECT customerNo FROM woori_social_user WHERE adminNum=#{adminNum} AND groupCode = #{groupCode} AND goodbye=0 
+	</select>
+	<update id="social_userGroupUpdate" parameterType="Map">
+		UPDATE  woori_social_user SET groupCode=#{groupCode} WHERE customerNo=#{customerNo}
+	</update>
+	<update id="getGroupNameUpdate" parameterType="Map">
+		UPDATE  woori_social_group SET groupName=#{groupName} WHERE groupCode=#{groupCode}
+	</update>
+	<update id="social_groupUserUpdate" parameterType="Map">
+		UPDATE  woori_social_user SET goodbye=2,update_date=now() WHERE groupCode=#{groupCode}
+	</update>
+	<update id="groupUserUpdate" >
+		UPDATE  woori_user SET goodbye=2 ,leavedate=now() WHERE customerNo=#{customerNo}
+	</update>
+	<delete id="groupDelete" parameterType="Map">
+		DELETE FROM  woori_social_group WHERE groupCode=#{groupCode}
+	</delete>
+</mapper>

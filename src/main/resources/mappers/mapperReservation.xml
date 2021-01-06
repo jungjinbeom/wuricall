@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wurigo.socialService.dao.ReservationDAO">
+	 
+	<insert id="registReservation" useGeneratedKeys="true"  keyProperty="serialNo"
+			parameterType="java.util.HashMap"  >
+		INSERT INTO woori_reservation (
+			reserveNo, subNo, reserveName, customerType, customerNo,create_date, 
+			periodType,  startDay, endDay,  reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code,
+			startLocX,startLocY,finishLocX, finishLocY,   <!-- for java -->
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,		<!-- for PHP -->
+			callPayMethod 		<!-- ,    serviceChargeFee -->
+		) VALUES
+			( #{reserveNo}, subNo+1, #{reserveName}, #{customerType}, #{customerNo}, now(), 
+			#{periodType},  #{startDay}, #{endDay},  #{reserveTime},
+			#{startLocPlace}, #{finishLocPlace}, #{startAddress}, #{finishAddress},
+			0 , 0, #{serviceType},   #{serviceCharge} , #{callfee}, #{groupNo},
+			#{passengerType},  #{passenger},  #{drivers},   #{etcService},   
+			#{s_sido_code}, #{e_sido_code }, 
+			#{startLocX} , #{startLocY}, #{finishLocX}, #{finishLocY},
+			#{startLocXenc} , #{startLocYenc}, #{finishLocXenc}, #{finishLocYenc},
+			#{callPayMethod} )	 	  <!-- ,   #{serviceChargeFee} -->				   
+	</insert>
+	 
+	<select id="getMaxReserveNo"  resultType="int">
+		SELECT  MAX(reserveNo ) AS maxNo FROM woori_reservation
+	</select>
+	
+	<update id="updateReservation" parameterType="java.util.HashMap" >
+		UPDATE woori_reservation 
+		<trim prefix="SET" suffixOverrides=",">
+			update_date=now(),
+			<if test="periodType != null"> periodType=#{periodType},</if>
+			<if test="reserveTime != null">	reserveTime = #{reserveTime},</if>
+			<if test="startLocPlace != null"> startLocPlace = #{startLocPlace},</if>	      	
+	      	<if test="finishLocPlace != null"> finishLocPlace = #{finishLocPlace},</if>
+	      	<if test="startAddress != null"> startAddress = #{startAddress},</if>
+		 	<if test="finishAddress != null"> finishAddress = #{finishAddress},</if>
+		 	<if test="serviceType != null"> serviceType = #{serviceType},</if>
+		 	<if test="serviceCharge != null"> serviceCharge = #{serviceCharge},</if>		 	
+		 	<if test="callfee != null"> 	callfee = #{callfee},</if>
+		 	<if test="groupNo != null"> 	groupNo = #{groupNo},</if>
+		 	<if test="passengerType != null"> passengerType = #{passengerType},</if>
+		 	<if test="passenger != null"> 	passenger = #{passenger},</if>
+		 	<if test="drivers != null"> 	drivers = #{drivers},</if>
+		 	<if test="callPayMethod != null"> callPayMethod = #{callPayMethod},</if>
+		 	<if test="etcService != null"> etcService = #{etcService},</if>
+		 	<if test="s_sido_code != null"> s_sido_code = #{s_sido_code},</if>
+		 	<if test="e_sido_code != null"> e_sido_code = #{e_sido_code},</if>
+		 	<if test="startLocX != null"> startLocX = #{startLocX},</if>		 	
+		 	<if test="startLocY != null"> startLocY = #{startLocY},</if>
+		 	<if test="finishLocX != null"> finishLocX = #{finishLocX},</if>
+		 	<if test="finishLocY != null"> finishLocY = #{finishLocY},</if>		 	
+		 	<if test="startLocXenc != null"> startLocXenc = #{startLocXenc},</if>		 	
+		 	<if test="startLocYenc != null"> startLocYenc = #{startLocYenc},</if>
+		 	<if test="finishLocXenc != null"> finishLocXenc = #{finishLocXenc},</if>
+		 	<if test="finishLocYenc != null"> finishLocYenc = #{finishLocYenc},</if>		 	
+		</trim>
+		WHERE reserveNo = #{reserveNo}  AND startDay = #{startDay}
+	</update>
+	
+	<update id="cancelAcceptedReservation" parameterType="java.util.HashMap" >
+		UPDATE woori_reservation 
+		<trim prefix="SET" suffixOverrides=",">
+			update_date=now(),
+			<if test="state != null">	state = #{state},</if>
+			<if test="caseType != null"> caseType = #{caseType},</if>	 	
+		</trim>
+		WHERE reserveNo = #{reserveNo} AND startDay = #{startDay} AND state=1 
+	</update>
+	
+	<delete id="deleteReservation">
+		DELETE FROM woori_reservation
+		 WHERE reserveNo = #{reserveNo}  AND startDay = #{startDay}
+	</delete>
+	
+	<select id="findReservationByToday"  resultType="com.wurigo.socialService.domain.Reservation">
+		SELECT 
+			reserveNo, subNo, reserveName, customerType, customerNo,create_date, driverNo,
+			periodType,  startDay, endDay,  reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code,
+			startLocX,startLocY,finishLocX, finishLocY,   <!-- for java -->
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,		<!-- for PHP -->
+			callPayMethod ,serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+		FROM woori_reservation  
+   		WHERE customerNo = #{customerNo} AND startDay = str_to_date(curdate(),'%Y-%m-%d')
+   		ORDER BY startDay   DESC
+	</select>
+	
+	<select id="findReservationByNo"  resultType="com.wurigo.socialService.domain.Reservation">
+		SELECT 
+			reserveNo, subNo, reserveName, customerType, customerNo,create_date, driverNo,
+			periodType,  startDay, endDay,  reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code,
+			startLocX,startLocY,finishLocX, finishLocY,   <!-- for java -->
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,		<!-- for PHP -->
+			callPayMethod ,serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+		FROM woori_reservation  
+   		WHERE reserveNo = #{reserveNo} AND startDay = #{startDay}
+	</select>
+	
+	<select id="findReservationByName"  resultType="com.wurigo.socialService.domain.Reservation">
+		SELECT 
+			reserveNo, subNo, reserveName, customerType, customerNo,create_date, driverNo,
+			periodType,  startDay, endDay,  reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code,
+			startLocX,startLocY,finishLocX, finishLocY,   <!-- for java -->
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,		<!-- for PHP -->
+			callPayMethod ,serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+		FROM woori_reservation  
+   		WHERE customerNo = #{customerNo} AND reserveName = #{reserveName}  
+	</select>
+	
+	
+	<select id="findReservationByAfterDay"  resultType="com.wurigo.socialService.domain.Reservation">
+		SELECT 
+			reserveNo, subNo, reserveName, customerType, customerNo,create_date, driverNo,
+			periodType,  startDay, endDay,  reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code,
+			startLocX,startLocY,finishLocX, finishLocY,   <!-- for java -->
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,		<!-- for PHP -->
+			callPayMethod ,serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+			
+		FROM woori_reservation   
+   		WHERE customerNo = #{customerNo} 
+   		AND str_to_date(startDay,'%Y-%m-%d') >= str_to_date( #{startDay} ,'%Y-%m-%d')
+   		ORDER BY  state ASC,  startDay   DESC
+	</select>
+	
+	<select id="findReservationByInterval" resultType="com.wurigo.socialService.domain.Reservation">
+		SELECT 
+			reserveNo, subNo, reserveName, customerType, customerNo,create_date, driverNo,
+			periodType,  startDay, endDay,  reserveTime,
+			startLocPlace, finishLocPlace, startAddress,finishAddress,
+			state,caseType, serviceType,   serviceCharge ,callfee, groupNo,passengerType,  
+			passenger,  drivers,   etcService,  
+			s_sido_code,e_sido_code,
+			startLocX,startLocY,finishLocX, finishLocY,   <!-- for java -->
+			startLocXenc, startLocYenc, finishLocXenc, finishLocYenc,		<!-- for PHP -->
+			callPayMethod ,serviceChargeFee,
+			fare, toll, totalpayment,anotherPayment,coupon_amt,isPay,payMethod,coupon_no,pay_date
+		FROM woori_reservation  
+   		WHERE customerNo = #{customerNo} 
+   		AND startDay BETWEEN str_to_date(#{startDay}, '%Y-%m-%d') and str_to_date( #{endDay}, '%Y-%m-%d')
+   		ORDER BY  state ASC,  startDay   DESC
+	</select>
+	
+</mapper>	

@@ -1,5 +1,7 @@
+
 package com.wurigo.socialService.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,15 @@ public class AdminServiceImpl implements AdminService {
 	@Override
 	public void lastLoginDateInsert(String adminId) throws Exception {
 		adminMapper.lastLoginDateInsert(adminId);
+	}
+	@Override
+	public List<Map<String,Object>>  districtInfo(Map<String, Object> params) throws Exception {
+		return adminMapper.districtInfo(params);
+	}
+	@Override
+	public void adminUpdatePwd(Map<String, Object> params) throws Exception {
+		// TODO Auto-generated method stub
+		adminMapper.adminUpdatePwd(params);
 	}
 	
 	

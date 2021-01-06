@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wurigo.socialService.dao.ServiceUtilsDAO">
+
+<!-- social booking -->
+	<select id="taxiReserTodayCount" parameterType="Map" resultType="HashMap">
+		SELECT reserveNo FROM woori_booking WHERE customerNo=#{customerNo} and startDay=#{startDay}
+	</select>
+	<select id="taxiReserTodayList">
+		SELECT state,startLocPlace,finishLocPlace,startDay,reserveTime FROM woori_booking WHERE customerNo=#{customerNo} and startDay=#{startDay}
+	</select>
+	<select id="userCustomerNoList" resultType="HashMap">
+		SELECT customerNo FROM woori_user WHERE zip_code=#{param1}
+	</select>
+ <!--   -->
+	
+	<select id="get_group_drivers"  parameterType="java.util.HashMap" resultType="string" >
+		SELECT driverlist FROM woori_taxigroup WHERE  groupNo = #{ groupNo }
+	</select>
+	
+	<select id="get_driver_type"  parameterType="java.util.HashMap" resultType="string" >
+		SELECT taxi_type FROM woori_driver WHERE driverNo = #{ driverNo } 
+	</select>
+	
+	<select id="get_proper_drivers" parameterType="java.util.HashMap" resultType="java.util.HashMap" >  <!-- resultType="String" -->
+		
+		SELECT A.driverno, A.taxi_type FROM woori_driver A WHERE approval=2 AND codeL = #{ areacode } AND 
+			A.driverno NOT IN (  
+			SELECT driverNo FROM woori_blocked_drivers B WHERE B.customerNo= #{ customerNo } AND B.driverNo=A.driverno  AND B.isblocked=1  
+			UNION ALL 
+			SELECT driverNo FROM woori_blocked_customers B WHERE B.customerNo= #{ customerNo } AND B.driverNo=A.driverno  AND B.isblocked=1 
+			)
+	</select>
+	
+	<select id="isOffday"  parameterType="java.util.HashMap" resultType="int">
+		SELECT count(driverNo)  FROM woori_driver_offday WHERE  driverNo = #{ driverNo } AND 	
+		#{ reserveDate } BETWEEN STR_TO_DATE( CONCAT( '20', offday, ' ', startTime, ':00' ), '%Y-%m-%d %H:%i:%s') 
+		AND	STR_TO_DATE( CONCAT( '20', offday, ' ', endTime, ':00' ), '%Y-%m-%d %H:%i:%s')  
+		  
+	</select>
+	
+	<select id="isCanceledDriver"  parameterType="string" resultType="int">
+		SELECT count(driverNo)  FROM woori_driver_cancel  WHERE reserveDay= #{ startDay } AND reserveTime= #{reserveTime} 
+		AND driverNo= #{ driverNo }  AND customerNo= #{ customerNo }
+		
+	</select>
+	
+	<resultMap type="HashMap" id="Loc"> 
+		<result column="startLocX"  property="startLocX"/> 
+		<result column="startLocY"  property="startLocY"/> 
+		<result column="finishLocX"  property="finishLocX"/> 
+		<result column="finishLocY"  property="finishLocY"/> 
+	</resultMap>
+	<select id="getReservedLocation"  parameterType="string" resultMap="Loc">
+	
+		SELECT startLocX,startLocY, finishLocX, finishLocY FROM woori_booking WHERE  state = 1 AND driverNo = #{ driverNo } AND  startDay= #{ startDay }  
+		UNION  
+		SELECT startLocX,startLocY, finishLocX, finishLocY FROM woori_reservation WHERE  state = 1 AND driverNo = #{ driverNo } AND  startDay= #{ startDay }
+
+	</select>
+	
+	<delete id="delete_booking_noti" parameterType="java.util.HashMap" >
+		DELETE FROM woori_noti_bookingcall
+		WHERE reserveType = #{reserveType} AND reserveNo = #{reserveNo}  
+		 <if test="startDay != null">
+		    AND startDate = #{startDay}
+		 </if>
+	</delete>
+	
+	<insert id="insert_booking_noti" parameterType="java.util.HashMap" >
+		INSERT INTO woori_noti_bookingcall 
+		( driverNo,reserveType,reserveNo, startDate, customerNo,create_date ) VALUES
+		( #{driverNo}, #{reserveType}, #{reserveNo}, #{startDay}, #{customerNo}, now() )	 					   
+	</insert>
+	
+	<insert id="insert_social_booking" parameterType="java.util.HashMap" >
+		INSERT INTO woori_social_booking
+		( customerNo,reserveType,reserveNo, create_date, adminNum ) VALUES
+		( #{customerNo}, #{reserveType}, #{reserveNo},   now(), #{adminNum } )	 					   
+	</insert>
+	
+	<delete id="delete_social_booking"  parameterType="java.util.HashMap" >
+		DELETE FROM woori_social_booking
+		WHERE reserveType = #{reserveType} AND reserveNo = #{reserveNo}  AND customerNo=#{customerNo}					   
+	</delete>
+	
+	<select id="isSocialBooking" parameterType="int" resultType="int">
+		SELECT count(seq)  FROM woori_social_booking
+		WHERE reserveType = #{reserveType} AND reserveNo = #{reserveNo} 
+	</select>
+	
+</mapper>

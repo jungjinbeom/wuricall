@@ -21,5 +21,15 @@ public class TaxiDriverServiceImpl implements TaxiDriverService {
 	public List<Map<String, Object>> TaxiDriverList(Map<String, Object> map) throws Exception {
 		return taxiDriverMapper.TaxiDriverList(map);
 	}
-
+	@Override
+	public List<Map<String, Object>> taxiDriverAllList() throws Exception {
+		// TODO Auto-generated method stub
+		return taxiDriverMapper.taxiDriverAllList();
+	}
+	@Override
+	public List<Map<String, Object>> taxiDriverInfoList(Map<String, Object> params) throws Exception {
+		// TODO Auto-generated method stub
+		
+		return taxiDriverMapper.taxiDriverInfoList(params);
+	}
 }

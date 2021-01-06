@@ -2,6 +2,7 @@ package com.wurigo.socialService.contoller;
 
 import java.util.HashMap;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -14,9 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wurigo.socialService.commons.CustomMailSender;
 import com.wurigo.socialService.commons.Utils;
-import com.wurigo.socialService.securty.WURI_Security;
+import com.wurigo.socialService.security.WURI_Security;
 import com.wurigo.socialService.service.AdminService;
 import com.wurigo.socialService.service.EmailService;
 
@@ -25,10 +25,12 @@ import com.wurigo.socialService.service.EmailService;
 @CrossOrigin(origins="*", maxAge=3600)
 @RequestMapping("/api/admin")
 public class AdminController {
+	
 	@Autowired
 	AdminService adminService;
 	@Autowired
 	EmailService emailService;
+	
 	@PostMapping("/register")
 	public Map<String,Object> register(@RequestBody Map<String,Object> params) throws Exception{
 		Map<String,Object> map = new HashMap<String, Object>();
@@ -37,7 +39,7 @@ public class AdminController {
 		String adminId = (String)params.get("adminId");
 		//먼저 중복되는 아이디가 있는지 읽어오고 있으면 뒤로가기 
 		String adminIdChk= adminService.readOne(adminId);
-		
+		System.out.println(params);
 		if(adminIdChk==null) {
 			if(pwdType.equals("plain")) {
 				dbPasswd = make_plain2dbpassword((String)params.get("password"));
@@ -49,10 +51,11 @@ public class AdminController {
 			map = adminService.groupCodeRecord(params);
 			
 			params.put("groupCode",map.get("code_l")+"_"+map.get("code_m"));
-			params.put("adminNum", make_customer_no());
+			params.put("adminNum", "AD_"+make_customer_no());
 			params.put("password", dbPasswd);
 			adminService.adminRegister(params);	
 			map.put("message","회원가입이 완료되었습니다!!");
+			map.put("success","success");
 		}else {
 			map.put("message","이미 가입되어있는 아이디 입니다.\n 다시시도해주세요");
 			
@@ -66,24 +69,30 @@ public class AdminController {
 	public Map<String, Object> login(@RequestBody Map<String, Object> params,HttpServletRequest req) throws Exception{
 		Map<String, Object> map = new HashMap<String, Object>();
 		Map<String, Object> user =adminService.adminLogin(params);
+		int approval = (int)user.get("approval");
 		String plainPasswd = (String)params.get("password");
-		if(user==null) {
+		if(user==null) { 
 			map.put("message","존재하지 않는 회원입니다.");
 		}else{
-			//로그인 창에 입력한 비밀번호랑 데이터베이스의 비밀번호를 가져와서 비교한다 
-			String encryptedPWD = WURI_Security.create_encrypted_password(plainPasswd);//입력한 비밀번호
-			String dbPasswd =(String)user.get("password");//데이터베이스에서 가져온 비밀번호 
-	  		boolean result = WURI_Security.verify_password(encryptedPWD, dbPasswd);
-	  		if(result ==false) {
-	  			map.put("message","비밀번호가 틀리셨습니다.\n다시시도해주세요.");
-	  		}else {
-	  			String adminId = (String)params.get("adminId");
-	  			String adminNum = (String)user.get("adminNum");
-	  			adminService.lastLoginDateInsert(adminId);
-	  			map.put("adminNum",adminNum);
-	  			map.put("loginSuccess",true);
-	  			map.put("message",user.get("adminName")+"님 환영합니다.");
-	  		}
+			
+			if(approval==2) {
+				//로그인 창에 입력한 비밀번호랑 데이터베이스의 비밀번호를 가져와서 비교한다 
+				String encryptedPWD = WURI_Security.create_encrypted_password(plainPasswd);//입력한 비밀번호
+				String dbPasswd =(String)user.get("password");//데이터베이스에서 가져온 비밀번호 
+		  		boolean result = WURI_Security.verify_password(encryptedPWD, dbPasswd);
+		  		if(result ==false) {
+		  			map.put("message","비밀번호가 틀리셨습니다.\n다시시도해주세요.");
+		  		}else {
+		  			String adminId = (String)params.get("adminId");
+		  			String adminNum = (String)user.get("adminNum");
+		  			adminService.lastLoginDateInsert(adminId);
+		  			map.put("adminNum",adminNum);
+		  			map.put("loginSuccess",true);
+		  			map.put("message",user.get("adminName")+"님 환영합니다.");
+		  		}
+			}else {
+				map.put("message","승인검토중 입니다.\n기다려 주시기 바랍니다.");
+			}
 		}
 		return map;
 	}
@@ -95,6 +104,7 @@ public class AdminController {
 		Map<String,Object> map=adminService.adminInfo(num);
 		String str =(String)map.get("groupName");
 		String [] array = str.split("-");
+		String password = (String)map.get("password");
 		map.put("sido", array[0]);
 		map.put("sigungu", array[1]);
 		return map;
@@ -113,29 +123,44 @@ public class AdminController {
 		
 		return map;
 	}
+	
+	@PostMapping("/adminFindId")
+	public Map<String,Object> adminFindId(@RequestBody Map<String,Object> params)throws Exception {
+		System.out.println(params);
+		Map<String,Object> map = new HashMap<String, Object>();
+		return map;
+	}
+	
 	@PostMapping("/adminFindPwd")
 	public Map<String,Object> adminFindPwd(@RequestBody Map<String,Object> params)throws Exception {
 		Map<String,Object> map = new HashMap<String, Object>();
 		String email = adminService.adminFindEmail(params);
-		
-		
-				
 		if(email==null) {
-			System.out.println("테스트"+null);
 			map.put("message","존재하지않는 아이디입니다");
 		}else {
-			String subject = "테스트";
+			String subject = "우리고 사회 서비스 임시비밀번호 입니다.";
 			String password = Utils.getRamdomPassword();
-			String body = "우리고 회원 임시비밀번호를 발급하였습니다.\n"+"임시비밀번호는"+password+"입니다"+" 회원 정보에서 수정하세요.";
-			String toAddress=email;
-			emailService.sendEmail(toAddress, subject, body);
+			String body = "우리고 회원 임시비밀번호는"+password+"입니다.\n"+"비밀번호 변경 회원 정보에서 변경바랍니다.";
+			String to=email;
+			emailService.sendMail(to,subject, body);
 			String DbPassword = make_plain2dbpassword(password);
-			System.out.println("DbPassword"+DbPassword);
 			adminService.adminPasswordUpdate(DbPassword,email);
+			map.put("message","입력하신 이메일로 임시비밀번호가 발급되었습니다.");
+		
 		}
 		return map;
 	}
-	
+	@PostMapping("/adminUpdatePwd")
+	public String adminUpdatePwd(@RequestBody Map<String,Object> params)throws Exception {
+		params.put("password",make_plain2dbpassword((String)params.get("password")));//입력한 비밀번호
+		adminService.adminUpdatePwd(params);
+		return "";
+	}
+	@PostMapping("/districtInfo")
+	public List<Map<String,Object>> districtInfo(@RequestBody Map<String,Object> params) throws Exception{
+		List<Map<String,Object>>  list =adminService.districtInfo(params);
+		return list;
+	}
 	
 	//adminNum 생성기 
 			public String make_customer_no() throws Exception   {

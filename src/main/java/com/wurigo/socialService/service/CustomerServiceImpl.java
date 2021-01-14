@@ -1,8 +1,9 @@
 package com.wurigo.socialService.service;
 
 
-import java.util.ArrayList;
+
 import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -15,14 +16,15 @@ import com.wurigo.socialService.commons.Utils;
 import com.wurigo.socialService.dao.ConstantDAO;
 import com.wurigo.socialService.dao.CustomerDAO;
 import com.wurigo.socialService.domain.Customer;
+import com.wurigo.socialService.domain.UserVO;
 import com.wurigo.socialService.security.WURI_Security;
 
-//import lombok.NonNull;
+
 
 
 
 @Service
-public class CustomerServiceImpl implements CustomerService {
+public class CustomerServiceImpl implements CustomerService  {
 	@Autowired
 	private CustomerDAO dao;
 	@Autowired
@@ -166,8 +168,7 @@ System.out.println("success dao.registerUser: "+r_map.get("usernum") )	;
 System.out.println("newNo: " + newNo + " user_token: " + user_token + " accesstoken:" + accesstoken );
  		
   		String dev_token="";  // login할때 update된다.
-  		updateToken(newNo, user_token, dev_token );
-  		
+  		updateToken(newNo, user_token, dev_token);
   		retMap.put("code", "777");
 		retMap.put("message", newNo);
   		retMap.put("accesstoken",  accesstoken);
@@ -469,9 +470,9 @@ System.out.print("plainPasswd" + plainPasswd + "\n");
 		return dao.social_userInfo(customerNo);
 	}
 	
-	public void social_userInfoEdit(Map<String, Object> params) throws Exception {
+	public int social_userInfoEdit(Map<String, Object> params) throws Exception {
 		
-		dao.social_userInfoEdit(params);
+		return dao.social_userInfoEdit(params);
 	}
 	public String getAdmin(String customerNo) throws Exception {
 		return dao.getAdmin(customerNo);
@@ -496,9 +497,9 @@ System.out.print("plainPasswd" + plainPasswd + "\n");
 	}
 
 	@Override
-	public void social_groupCreate(Map<String, Object> param) throws Exception {
+	public int social_groupCreate(Map<String, Object> param) throws Exception {
 		// TODO Auto-generated method stub
-		 dao.social_groupCreate(param);
+		return dao.social_groupCreate(param);
 	}
 
 	@Override
@@ -529,8 +530,8 @@ System.out.print("plainPasswd" + plainPasswd + "\n");
 	}
 
 	@Override
-	public void social_userGroupUpdate(Map<String, Object> params) throws Exception {
-		dao.social_userGroupUpdate(params);
+	public int social_userGroupUpdate(Map<String, Object> params) throws Exception {
+		return dao.social_userGroupUpdate(params);
 	}
 
 	
@@ -547,26 +548,54 @@ System.out.print("plainPasswd" + plainPasswd + "\n");
 		String adminNum = (String)param.get("adminNum");
 		int groupCode = (int)param.get("groupCode");
 		List<Map<String,Object>> list = dao.social_getCustomerNo(adminNum,groupCode);
-		System.out.println("list="+list);
-		
 		int result = dao.social_groupUserUpdate(param);
-		System.out.println(result);
 		if(result!=0) {
 			for(int i =0; i<list.size();i++){
 				String customerNo = (String)list.get(i).get("customerNo");
-				
-				System.out.println("유저 데이터 변경 2"+customerNo);
+				System.out.println(customerNo);
 				int SEQ2Result = dao.groupUserUpdate(customerNo);
 			}
 		}
 		int SEQ3Result =dao.groupDelete(param);
 		if(SEQ3Result==1) {
 			map.put("message","그룹이 정상적으로 삭제되었습니다.");
+			map.put("success","success");
 		}else {
 			map.put("message","그룹삭제 과정 중 에러가 발생하였습니다\n 다시 시도해주세요.");
 		}
 		return map;
 	}
+
+	@Override
+	public UserVO userInfo(String customerNo) throws Exception {
+		return dao.userInfo(customerNo);
+	}
+
+	@Override
+	public UserVO userLogin(Map<String, Object> params) throws Exception {
+		return  dao.userLogin(params);
+	}
+
+	@Override
+	public void insertUserRecord(Map<String, Object> params) throws Exception {
+		dao.insertUserRecord(params);
+	}
+
+	@Override
+	public void userInfoUpdate(Map<String, Object> params) throws Exception {
+		dao.userInfoUpdate(params);
+	}
+
+	@Override
+	public String licenseImageRecord(String customerNo) throws Exception {
+		return  dao.licenseImageRecord(customerNo);
+	}
+
+	@Override
+	public void updateDisabledInfo(Map<String, Object> map) {
+		
+	}
+	
 }
 
 

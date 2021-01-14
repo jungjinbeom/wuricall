@@ -39,7 +39,6 @@ public class AdminController {
 		String adminId = (String)params.get("adminId");
 		//먼저 중복되는 아이디가 있는지 읽어오고 있으면 뒤로가기 
 		String adminIdChk= adminService.readOne(adminId);
-		System.out.println(params);
 		if(adminIdChk==null) {
 			if(pwdType.equals("plain")) {
 				dbPasswd = make_plain2dbpassword((String)params.get("password"));
@@ -69,12 +68,11 @@ public class AdminController {
 	public Map<String, Object> login(@RequestBody Map<String, Object> params,HttpServletRequest req) throws Exception{
 		Map<String, Object> map = new HashMap<String, Object>();
 		Map<String, Object> user =adminService.adminLogin(params);
-		int approval = (int)user.get("approval");
 		String plainPasswd = (String)params.get("password");
 		if(user==null) { 
 			map.put("message","존재하지 않는 회원입니다.");
 		}else{
-			
+			int approval = (int)user.get("approval");
 			if(approval==2) {
 				//로그인 창에 입력한 비밀번호랑 데이터베이스의 비밀번호를 가져와서 비교한다 
 				String encryptedPWD = WURI_Security.create_encrypted_password(plainPasswd);//입력한 비밀번호
@@ -118,8 +116,13 @@ public class AdminController {
 		params.put("sigungu", array[1]);
 		map = adminService.groupCodeRecord(params);
 		params.put("groupCode",map.get("code_l")+"_"+map.get("code_m"));
-		adminService.adminInfoEdit(params);
-		map.put("message","정보가 변경되었습니다.");
+		int result = adminService.adminInfoEdit(params);
+		if(result==1) {
+			map.put("message","정보가 변경되었습니다.");
+			map.put("success","success");
+		}else {
+			map.put("message","정보변경 중 에러가 발생했습니다.\n다시시도해주세요.");
+		}
 		
 		return map;
 	}
@@ -151,10 +154,18 @@ public class AdminController {
 		return map;
 	}
 	@PostMapping("/adminUpdatePwd")
-	public String adminUpdatePwd(@RequestBody Map<String,Object> params)throws Exception {
+	public Map<String,Object> adminUpdatePwd(@RequestBody Map<String,Object> params)throws Exception {
+		Map<String,Object> map = new HashMap<String, Object>();
 		params.put("password",make_plain2dbpassword((String)params.get("password")));//입력한 비밀번호
-		adminService.adminUpdatePwd(params);
-		return "";
+		
+		int result = adminService.adminUpdatePwd(params);
+		if(result == 1) {
+			map.put("success", "success");
+			map.put("message", "비밀번호가 정상적으로 변경되었습니다.");
+		}else {
+			map.put("message", "비밀번호 변경이 실패하였습니다.\n다시시도해주세요.");
+		}
+		return map;
 	}
 	@PostMapping("/districtInfo")
 	public List<Map<String,Object>> districtInfo(@RequestBody Map<String,Object> params) throws Exception{

@@ -49,5 +49,7 @@ public interface BookingDAO {
 	public int getMaxBookingNo() throws Exception;
 	
 	public int cancelAcceptedBooking(Map<String, Object> map) throws Exception; 
+	
+	public List<Map<String, Object>> findBooking(@Param("groupNo")String groupNo)throws Exception;
 	  
 }

@@ -37,9 +37,9 @@ public class AdminServiceImpl implements AdminService {
 		return adminMapper.adminInfo(adminId);
 	}
 	@Override
-	public void adminInfoEdit(Map<String, Object> params) throws Exception {
+	public int adminInfoEdit(Map<String, Object> params) throws Exception {
 		// TODO Auto-generated method stub
-		 adminMapper.adminInfoEdit(params);
+		 return adminMapper.adminInfoEdit(params);
 	}
 	@Override
 	public String adminFindEmail(Map<String, Object> params) throws Exception {
@@ -68,9 +68,9 @@ public class AdminServiceImpl implements AdminService {
 		return adminMapper.districtInfo(params);
 	}
 	@Override
-	public void adminUpdatePwd(Map<String, Object> params) throws Exception {
+	public int adminUpdatePwd(Map<String, Object> params) throws Exception {
 		// TODO Auto-generated method stub
-		adminMapper.adminUpdatePwd(params);
+		 return adminMapper.adminUpdatePwd(params);
 	}
 	
 	

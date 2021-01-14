@@ -17,7 +17,7 @@
 		FROM
 		 	woori_taxigroup 
 		WHERE 
-			customerNo=#{param1} 
+			customerNo=#{param1} AND isDeleted=0
 	</select>
 	
 	<select resultType="HashMap" id="taxiGroupDetail">
@@ -31,7 +31,7 @@
 	
 	<select resultType="HashMap" id="taxiDriverInfo">
 		SELECT
-			drivername,driverno,phoneno, DATE_FORMAT(create_date,'%Y-%m-%d')create_date,taxi_no,taxi_type,taxi_size
+				drivername,driverno,phoneno,belong,DATE_FORMAT(create_date,'%Y-%m-%d')create_date,taxi_no,taxi_type,taxi_size,islady
 		FROM
 			woori_driver
 		WHERE
@@ -60,5 +60,7 @@
 		 WHERE 
 		 groupNo=#{param1} 
 	</delete>
-
+	<update id="taxiGroupUpdate">
+		UPDATE woori_taxigroup SET isDeleted=1 WHERE groupNo=#{groupNo}
+	</update>
 </mapper>

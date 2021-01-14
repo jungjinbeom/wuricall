@@ -21,8 +21,8 @@
 		( 	#{reserveNo}, #{customerType}, #{customerNo}, now(), 
 			#{startDay}, #{reserveTime},
 			#{startLocPlace}, #{finishLocPlace}, #{startAddress}, #{finishAddress},
-			0 , 0, #{serviceType},   #{serviceCharge} , #{callfee}, #{groupNo},
-			#{passengerType},  #{passenger},  #{drivers},   #{etcService},   
+			0 , 0, #{serviceType},#{serviceCharge} , #{callfee}, #{groupNo},
+			#{passengerType},  #{passenger},  #{drivers},   #{serviceTxt},   
 			#{s_sido_code}, #{e_sido_code }, #{callPayMethod},  	<!-- #{serviceChargeFee, jdbcType=INTEGER}, --> 
 			#{startLocX} , #{startLocY}, #{finishLocX}, #{finishLocY},   <!-- for java -->
 			#{startLocXenc} , #{startLocYenc}, #{finishLocXenc}, #{finishLocYenc} <!-- for PHP -->
@@ -178,5 +178,7 @@
    			startDay BETWEEN str_to_date(#{startDay}, '%Y-%m-%d') and str_to_date(#{endDay}, '%Y-%m-%d')
    		ORDER BY  state ASC,  startDay   DESC
 	</select>
-	
+	<select id="findBooking" resultType="Map">
+		select reserveNo from woori_booking where groupNo =#{groupNo}
+	</select>
 </mapper>	

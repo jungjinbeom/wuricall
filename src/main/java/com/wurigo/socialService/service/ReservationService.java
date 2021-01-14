@@ -85,4 +85,6 @@ public interface ReservationService {
 //  social booking	
 	public List<Map<String,Object>> taxiReserTodayCount(Map<String, Object> param)throws Exception;
 	public List<Map<String,Object>> userCustomerNoList(String email)throws Exception;
+	public List<Map<String,Object>> findBooking(String groupNo)throws Exception ;
+	
 }

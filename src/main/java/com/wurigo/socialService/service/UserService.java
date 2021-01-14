@@ -2,7 +2,11 @@ package com.wurigo.socialService.service;
 
 import java.util.List;
 
+
 import java.util.Map;
+
+import com.wurigo.socialService.domain.UserVO;
+
 
 public interface UserService {
 	
@@ -13,5 +17,6 @@ public interface UserService {
 	public List<Map<String,Object>> userInfoList(String zip_code)throws Exception;
 	public Map<String,Object> userInfo(String customerNo)throws Exception;
 	public void userInfoEdit(Map<String,Object> params)throws Exception;
+	
 	
 }

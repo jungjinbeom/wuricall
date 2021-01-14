@@ -418,21 +418,11 @@ System.out.println("registBooking:" + retMap.toString());
 	}
 	
 	public Map<String, Object> regist_socialBooking(Map<String, Object> param) throws Exception{
-		System.out.println(param.get("user_token"));
 		
-		param.put("accesstoken",Common.make_access_token((String)param.get("user_token")));
-		String accesstoken = (String)param.get("accesstoken");
-		
-		System.out.println(accesstoken);
-		
-		Map<String, Object> ret = Common.check_accesstoken(accesstoken);
-		int code = (int)ret.get("code");
-		if(code<2) return ret;
 		
 		Map<String, Object>  retMap = new HashMap<String, Object>();
-		
-		String customerNo = (String)ret.get("customerNo");
-		int customerType = Integer.parseInt((String)ret.get("customerType"));
+		String customerNo = (String)param.get("customerNo");
+		int customerType = (int)param.get("customerType");
 		param.put("customerNo", customerNo);
 		param.put("customerType", customerType);
 		
@@ -471,8 +461,6 @@ System.out.println("registBooking:" + retMap.toString());
 			return retMap;
 		}
 		
-		String newtoken = Common.update_accesstoken(accesstoken);
-		retMap.put("accesstoken", newtoken);
 		retMap.put("code",strCode);
 		retMap.put("message", reserveNo);
 		
@@ -482,13 +470,8 @@ System.out.println("registBooking:" + retMap.toString());
 	
 	@Override
 	public Map<String, Object> update_socialBooking(Map<String, Object> param) throws Exception{//예약 수정
-		param.put("accesstoken",Common.make_access_token((String)param.get("user_token")));
-		String accesstoken = (String)param.get("accesstoken");
-		Map<String, Object> ret = Common.check_accesstoken(accesstoken);
-		int code = (int)ret.get("code");
-		if(code<2) return ret;
 		String customerNo = (String)param.get("customerNo");
-		int customerType = 9;
+		int customerType = (int)param.get("customerType");
 		
 		Map<String, Object>  retMap = new HashMap<String, Object>();
 		param.put("customerNo", customerNo);
@@ -519,8 +502,6 @@ System.out.println("updateBooking result:" + rcount);
 			return retMap;
 		}
 		
-		String newtoken = Common.update_accesstoken(accesstoken);
-		retMap.put("accesstoken", newtoken);
 		retMap.put("code",strCode);
 		retMap.put("message", reserveNo);
 System.out.println("update_accesstoken:" + retMap.toString());		
@@ -1020,6 +1001,10 @@ System.out.println("proper_driver sel:" + driverNo);
 	@Override
 	public List<Map<String, Object>> userCustomerNoList(String email) throws Exception {
 		return  ServiceDao.userCustomerNoList(email);
+	}
+	@Override
+	public List<Map<String, Object>> findBooking(String groupNo) throws Exception {
+		return bookingDao.findBooking(groupNo);
 	}
 	
 	

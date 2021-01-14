@@ -18,16 +18,16 @@ public class TaxiGroupServiceImpl implements TaxiGroupService {
 		return taxiGroupMapper.readOne(groupNo);
 	}
 	@Override
-	public void taxiGroupRegister(Map<String,Object> map) throws Exception {
-		taxiGroupMapper.taxiGroupRegister(map);
+	public int taxiGroupRegister(Map<String,Object> map) throws Exception {
+		return taxiGroupMapper.taxiGroupRegister(map);
 	}
 	@Override
 	public List<Map<String, Object>> taxiGroupList(String adminNum) throws Exception {
 		return taxiGroupMapper.taxiGroupList(adminNum);
 	}
 	@Override
-	public void taxiGroupDelete(String adminNum) throws Exception {
-		taxiGroupMapper.taxiGroupDelete(adminNum);
+	public int taxiGroupDelete(String groupNo) throws Exception {
+		return taxiGroupMapper.taxiGroupDelete(groupNo);
 	}
 	@Override
 	public Map<String, Object> taxiGroupDetail(String groupNo) throws Exception {
@@ -39,7 +39,11 @@ public class TaxiGroupServiceImpl implements TaxiGroupService {
 		return taxiGroupMapper.taxiDriverInfo(driverNo);
 	}
 	@Override
-	public void taxiGroupEdit(String driverList,String groupName,String groupNo) throws Exception {
-		 taxiGroupMapper.taxiGroupEdit(driverList,groupName,groupNo);
+	public int taxiGroupEdit(String driverList,String groupName,String groupNo) throws Exception {
+		return taxiGroupMapper.taxiGroupEdit(driverList,groupName,groupNo);
+	}
+	@Override
+	public int taxiGroupUpdate(String groupNo) throws Exception {
+		return taxiGroupMapper.taxiGroupUpdate(groupNo);
 	}
 }

@@ -18,7 +18,7 @@
 	</select>
 	<select id="taxiDriverAllList" parameterType="Map" resultType="HashMap"> 
 		SELECT 
-			drivername,driverno,phoneno, DATE_FORMAT(create_date,'%Y-%m-%d')create_date,taxi_no,taxi_type,taxi_size,islady
+			drivername,driverno,phoneno,belong,DATE_FORMAT(create_date,'%Y-%m-%d')create_date,taxi_no,taxi_type,taxi_size,islady
 		FROM 
 			woori_driver
 	</select>

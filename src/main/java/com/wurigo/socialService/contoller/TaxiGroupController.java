@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wurigo.socialService.service.ReservationService;
 import com.wurigo.socialService.service.TaxiGroupService;
 
 @RestController
@@ -25,6 +26,9 @@ import com.wurigo.socialService.service.TaxiGroupService;
 public class TaxiGroupController {
 	@Autowired
 	TaxiGroupService taxiGroupService;  
+	@Autowired
+	ReservationService reservationService;
+	
 	@PostMapping("/taxiGroupList/{adminNum}")
 	public List<Map<String,Object>> taxiGroupList(@PathVariable String adminNum)throws Exception {//그룹 리스트 가져오기 
 		List<Map<String,Object>> list =taxiGroupService.taxiGroupList(adminNum);
@@ -41,7 +45,6 @@ public class TaxiGroupController {
 		    data = list.get(i);
 		    data.put("count", map.get("count"));
 		}
-		System.out.println(list);
 		return list;
 	}
 	@PostMapping("/taxiGroupDetail/{groupNo}")
@@ -70,15 +73,23 @@ public class TaxiGroupController {
 		Map<String,Object> map = new HashMap<String, Object>();
 		Map<String,Object> data = new HashMap<String, Object>();		
 		String driverList = "";
+		int result =0;
 		for(int i =0;i<params.size();i++) {
 			driverList+=params.get(i).get("driverno")+"^";
 		}
 		map.put("adminNum",adminNum);
 		map.put("groupName",groupName);
 		map.put("driverlist",driverList);
-		taxiGroupService.taxiGroupRegister(map);
-		data.put("success","success");
-		data.put("message","그룹생성이 완료되었습니다");
+		System.out.println(map);
+		result = taxiGroupService.taxiGroupRegister(map);
+		System.out.println(result);
+		if(result==1) {
+			data.put("success","success");
+			data.put("message","그룹생성이 완료되었습니다");
+		}else {
+			data.put("message","그룹생성중 에러가 발생하였습니다.\n다시시도해주세요");
+		}
+		
 		return data;
 	}
 	@PostMapping("/groupNameInfo/{groupNo}")
@@ -86,6 +97,7 @@ public class TaxiGroupController {
 		Map<String,Object> map = taxiGroupService.taxiGroupDetail(groupNo);
 		return map;
 	}
+	
 	@PutMapping("/edit/{groupNo}")
 	public Map<String,Object> taxiGroupEdit(@RequestBody Map<String,Object> params,@PathVariable String groupNo) throws Exception{
 		Map<String,Object> map = new HashMap<String, Object>();
@@ -96,17 +108,42 @@ public class TaxiGroupController {
 			String driverNo = (String) list.get(i).get("driverno");
 			driverList += driverNo+"^";
 		}
-		taxiGroupService.taxiGroupEdit(driverList,groupName,groupNo);
-		map.put("message","정상적으로 수정이 완료되었습니다.");
+		int result = taxiGroupService.taxiGroupEdit(driverList,groupName,groupNo);
+		
+		if(result==1) {
+			map.put("message","정상적으로 수정이 완료되었습니다.");
+			map.put("success","success");
+		}else {
+			map.put("message","수정 중 에러가 발생하였습니다.\n다시 시도해주세요.");
+		}
 		return map;
 	}
 	
-	@DeleteMapping("/delete/{groupNo}")
+	@PostMapping("/delete/{groupNo}")
 	public Map<String,Object> taxiGroupDelete(@PathVariable String groupNo) throws Exception{//그룹 삭제 
 		Map<String,Object> map = new HashMap<String, Object>();
-		//예약에가서 만약 예약자가 있다면 택시그룹을 삭제하기 위해서는 예약을 취소하던가 완료된 뒤에 삭제 해주세요 
-		taxiGroupService.taxiGroupDelete(groupNo);
-		map.put("message","선택하신 그룹이 삭제되었습니다.");
+		//예약에가서 만약 예약자가 있다면 택시그룹을 삭제하기 위해서는 예약을 취소하던가 완료된 뒤에 삭제 해주세요
+		List<Map<String,Object>> data = reservationService.findBooking(groupNo);
+		int result= 0;
+		if(data==null) {
+			result = taxiGroupService.taxiGroupDelete(groupNo);
+			if(result==1) {
+				map.put("message","선택하신 그룹이 삭제되었습니다.");
+				map.put("success","success");
+			}else {
+				map.put("message","그룹삭제 중 에러가 발생 하였습니다.\n다시시도해주세요.");
+			}
+		}else {
+			result = taxiGroupService.taxiGroupUpdate(groupNo);
+			map.put("message","선택하신 그룹이 삭제되었습니다.");
+			if(result==1) {
+				map.put("message","선택하신 그룹이 삭제되었습니다.");
+				map.put("success","success");
+			}else {
+				map.put("message","그룹삭제 중 에러가 발생 하였습니다.\n다시시도해주세요.");
+			}
+		}
+		
 		return map;
 	}
 }

@@ -394,7 +394,6 @@ System.out.println("SEED_CBC_Decrypt: " + atoken);
 	}
 	
 	public static String update_accesstoken( String accesstoken) {
-		
 		byte[] accessBytes = parseHexBinary(accesstoken);
 	    byte[] retBytes = KISA_SEED_CBC.SEED_CBC_Decrypt(pbUserKey, pbIV, accessBytes, 0, accessBytes.length);
 	    String atoken = new String(retBytes, StandardCharsets.UTF_8);

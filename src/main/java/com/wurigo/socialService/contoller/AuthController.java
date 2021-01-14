@@ -22,7 +22,6 @@ public class AuthController {
 	public Map<String, Object> auth(HttpServletRequest req,@RequestBody Map<String,Object> map) {
 		Map<String, Object> data = new HashMap<String, Object>();
 		String state=(String)map.get("state");
-		System.out.println("state="+state);
 		if(state==null) {
 			System.out.println("페이지 핸들러 실패");
 			data.put("success",true);

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wurigo.socialService.dao.BoardDAO">
+	<select id="boardList" resultType="com.wurigo.socialService.domain.BoardVO"> 
+		SELECT seq,title,contents,createDate  FROM woori_notice 
+	</select>
+	<select id="boardRecordSelect" resultType="com.wurigo.socialService.domain.BoardVO">
+		SELECT * FROM woori_notice WHERE seq=#{param1}
+	</select>
+	<insert id="insertBoard" parameterType="Map">
+		INSERT INTO woori_notice(title,contents,createDate)VALUES(#{title},#{contents},now())
+	</insert>
+	<update id="boardRecordUpdate" parameterType="Map">
+		UPDATE woori_notice 
+			SET 
+				title=#{title},contents=#{contents},updateDate=now() 
+			WHERE
+			 	seq=#{seq} 
+	</update>
+	<delete id="boardRecordDelete">
+		DELETE FROM woori_notice WHERE seq=#{seq}
+	</delete>
+	<select id="boardQuestionList" resultType="com.wurigo.socialService.domain.BoardVO">
+		SELECT * FROM woori_questions_board
+	</select>
+	<select id="boardQuestionRecord" resultType="Map">
+		SELECT * FROM woori_questions_board WHERE seq=#{seq}
+	</select>
+	<select id="boardQuestionReplyList" resultType="Map">
+		SELECT * FROM woori_reply WHERE seq=#{seq}
+	</select>
+	<insert id="boardQuestionRecordInsert"  parameterType="Map">
+		INSERT INTO woori_questions_board
+			(customerNo,title,contents,email,username,createDate) 
+		VALUES
+			(#{customerNo},#{title},#{email},#{username},#{contents},now())
+	</insert>
+	<insert id="boardQuestionReplyInsert"  parameterType="Map">
+		INSERT INTO woori_reply
+			(seq,customerNo,email,username,reply,createDate) 
+		VALUES
+			(#{seq},#{customerNo},#{email},#{username},#{reply},now())
+	</insert>
+	<update id="boardQuestionRecordEdit">
+		UPDATE woori_questions_board SET title=#{title},contents=#{contents} WHERE seq=#{seq}
+	</update>
+	<delete id="boardQuestionReplyDelete">
+		DELETE FROM woori_reply WHERE seq=#{seq}
+	</delete>
+	<delete id="boardQuestionRecordDelete">
+		DELETE FROM  woori_questions_board where seq = #{seq}
+	</delete>
+</mapper>

@@ -161,10 +161,55 @@
 	<update id="social_groupUserUpdate" parameterType="Map">
 		UPDATE  woori_social_user SET goodbye=2,update_date=now() WHERE groupCode=#{groupCode}
 	</update>
-	<update id="groupUserUpdate" >
-		UPDATE  woori_user SET goodbye=2 ,leavedate=now() WHERE customerNo=#{customerNo}
+	<update id="groupUserUpdate">
+		UPDATE  woori_user SET goodbye=2,customerType=0,leavedate=now() WHERE customerNo=#{customerNo}
 	</update>
 	<delete id="groupDelete" parameterType="Map">
 		DELETE FROM  woori_social_group WHERE groupCode=#{groupCode}
 	</delete>
+	
+	
+	<select id="userInfo" resultType="com.wurigo.socialService.domain.UserVO">
+		SELECT customerNo,email,phone,username,licenseNo,guardian,licenseImage FROM woori_user WHERE customerNo=#{param1}
+	</select>
+	
+	
+	 <select id="userLogin" parameterType="HashMap" resultType="com.wurigo.socialService.domain.UserVO">
+    	SELECT * from woori_user where email=#{email}
+    </select>
+    <select id="licenseImageRecord" resultType="string">
+		select licenseImage from woori_user where customerNo =#{param1}    
+    </select>
+	<insert id="insertUserRecord">
+		INSERT 
+	    	INTO woori_user
+	    		(customerNo,customerType,email,username,password2,phone,create_date,user_token)
+	    	VALUE
+	    		(#{customerNo},0,#{email},#{nickname},#{password2},#{phone},now(),#{user_token})
+	</insert>
+	
+	 
+	<update id="userInfoUpdate" parameterType="java.util.HashMap">
+		UPDATE woori_user 
+			SET 
+				username =#{username,jdbcType=VARCHAR},phone=#{phone,jdbcType=VARCHAR}
+					<if test='password != null'>
+						,password2=#{password2}
+					</if>
+		 	WHERE 
+		 		customerNo = #{customerNo}
+	</update>
+   	<update id="updateDisabledInfo" parameterType="java.util.HashMap">
+   		UPDATE woori_user
+   			SET
+   				guardian=#{guardian},licenseNo=#{licenseNo}
+				<if test='licenseImage != null'>
+					,licenseImage=#{licenseImage}
+				</if>
+			WHERE 
+		 		customerNo = #{customerNo}
+   	</update>
+	
+	
+	
 </mapper>

@@ -36,6 +36,13 @@ targetCompatibility = '1.8'
 repositories {
 	mavenCentral()
 }
+
+bootWar.enabled=false
+war.enabled = true
+
+war{
+	baseName="ROOT"
+}
 bootWar {
 	archiveBaseName="ROOT"
 	archiveFileName="ROOT.war"
@@ -56,6 +63,7 @@ dependencies {
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
+	compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
 	
 }
 

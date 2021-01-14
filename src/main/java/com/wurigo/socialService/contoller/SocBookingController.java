@@ -80,6 +80,7 @@ public class SocBookingController {
 	public Map<String,Object> taxiBookingInfo(@PathVariable String reserveNo,@PathVariable int num) throws Exception{
 		
 		Map<String,Object> map = socBookingService.getBookingInfo(reserveNo);
+		System.out.println(map);
 		String passenger = (String)map.get("passenger");
 		String [] str = passenger.split("\\/");
 		map.put("userName", str[0]);
@@ -135,6 +136,7 @@ public class SocBookingController {
 		param.put("reserveNo", reserveNo);
 		param.put("customerType",9);
 		Map<String,Object> map = socBookingService.cancel_socialBooking(param);
+	
 		return map;
 	}
 	
